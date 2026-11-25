@@ -7,7 +7,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ENTRY =
-  "Earth: beautiful sunsets, edible snacks, and the locals built a box that washes their dishes, then argue about whose turn it is to empty it. 4/5 stars — would orbit again.";
+  "Earth: gorgeous sunsets, edible snacks, and the locals built a box that washes their dishes, then argue about whose turn it is to empty it. 4/5 — would orbit again.";
 
 const MAX_CHARS = 200;
 
@@ -21,6 +21,17 @@ function validate(text: string): void {
   }
   if (text.includes("\n") || text.includes("\r")) {
     throw new Error("entry must be a single line");
+  }
+  if (text !== text.trim()) {
+    throw new Error("entry must not start or end with whitespace");
+  }
+  // Control characters other than the em dash are not printable review text.
+  if (/[\u0000-\u001F\u007F]/.test(text)) {
+    throw new Error("entry must not contain control characters");
+  }
+  const bytes = Buffer.byteLength(text, "utf8");
+  if (bytes > 400) {
+    throw new Error(`entry must be at most 400 UTF-8 bytes, got ${bytes}`);
   }
 }
 
